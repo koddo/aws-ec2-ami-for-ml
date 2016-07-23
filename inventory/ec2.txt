@@ -1,0 +1,3 @@
+see readme and
+   http://docs.ansible.com/ansible/intro_dynamic_inventory.html#example-aws-ec2-external-inventory-script
+
