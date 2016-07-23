@@ -1,0 +1,41 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: provision a set of instances
+      ec2:
+        # instance_type: t1.micro
+        # image: ami-971a65e0
+        # spot_price: 0.005
+        instance_type: g2.2xlarge
+        image: ami-b9bd25ca   # nvidia ami --- https://aws.amazon.com/marketplace/pp/B00FYCDDTE
+        spot_price: 1.0
+        key_name: alex@mbp985
+        groups: my-test-security-group--eu-west-1
+        aws_region: eu-west-1
+        aws_zone: eu-west-1c
+        spot_type: one-time
+        spot_wait_timeout: 6000
+        wait: true   # doesn't work without this
+        # exact_count: 1
+        # count_tag:
+        #   Name: Demo
+        # instance_tags:
+        #   Name: Demo
+        count: 1
+      register: launched_ec2
+      
+    - name: wait for ssh to come up
+      wait_for:
+        host: '{{ item.public_dns_name }}'
+        port: 22
+        state: started
+        delay: 10
+        timeout: 300
+      with_items: '{{ launched_ec2.instances }}'
+
+    - name: add keys of launched instances to local known_hosts
+      include: tasks/aws-add-to-known-hosts.yml
+      with_items: '{{ launched_ec2.instances }}'
+

@@ -1,0 +1,20 @@
+{
+    "builders": [{
+        "type": "amazon-ebs",
+        "region": "eu-west-1",
+        "source_ami": "ami-b9bd25ca",
+        "instance_type": "g2.2xlarge",
+        "spot_price": "1.0",
+        "ssh_username": "ec2-user",
+        "ami_name": "packer-ml {{timestamp}}",
+        "associate_public_ip_address": "true"
+    }],
+    "provisioners": [
+        {
+            "type": "ansible",
+            "playbook_file": "./packer-ml.playbook.yml",
+            "groups": ["ec2"],
+            "sftp_command": "/usr/libexec/openssh/sftp-server -e"
+        }
+    ]
+}

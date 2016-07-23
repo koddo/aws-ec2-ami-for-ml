@@ -1,0 +1,131 @@
+
+- name: check if anaconda3 is installed
+  stat:
+    path: "{{ ansible_env['HOME'] }}/anaconda3/bin/conda"
+  register: anaconda3_file
+    
+- name: download anaconda3
+  get_url:
+    url: https://repo.continuum.io/archive/Anaconda3-4.1.1-Linux-x86_64.sh
+    dest: /tmp
+    checksum: sha256:4f5c95feb0e7efeadd3d348dcef117d7787c799f24b0429e45017008f3534e55
+    mode: 0755
+  when: not anaconda3_file.stat.exists
+
+- name: install anaconda3
+  shell: /tmp/Anaconda3-4.1.1-Linux-x86_64.sh -b -p $HOME/anaconda3
+  args:
+    executable: /bin/bash
+  when: not anaconda3_file.stat.exists
+    
+# the following is a mix of
+# http://deeplearning.net/software/theano/install_centos6.html#install-centos6
+# https://github.com/fchollet/keras#installation
+
+- name: install dependencies for theano
+  become: yes
+  become_user: root
+  become_method: sudo
+  yum:
+    update_cache: yes
+    name:
+      - gcc
+      - gcc-gfortran
+      - gcc-c++
+      - blas-devel
+      - lapack-devel
+      - atlas-devel
+
+- name: check if cudnn is installed
+  stat:
+    path: /opt/nvidia/cuda/include/cudnn.h
+  register: cudnn_file
+
+- name: download cudnn
+  get_url:
+    url: https://dl.dropboxusercontent.com/u/11889463/cudnn-7.5-linux-x64-v5.0-ga.tgz
+    dest: /tmp
+    checksum: sha256:c4739a00608c3b66a004a74fc8e721848f9112c5cb15f730c1be4964b3a23b3a
+    # https://developer.nvidia.com/cudnn
+  when: not cudnn_file.stat.exists
+
+- name: install cudnn
+  become: yes
+  become_user: root
+  become_method: sudo
+  unarchive:
+    src: /tmp/cudnn-7.5-linux-x64-v5.0-ga.tgz
+    dest: /opt/nvidia/
+    copy: no
+  when: not cudnn_file.stat.exists
+
+- name: install utils
+  become: yes
+  become_user: root
+  become_method: sudo
+  yum:
+    update_cache: yes
+    name:
+      - tmux
+      - git
+
+- name: install theano and keras
+  pip:
+    name: "Theano pyyaml keras"
+    executable: "{{ ansible_env['HOME'] }}/anaconda3/bin/pip"
+
+- name: check if opencv is installed
+  stat:
+    path: "{{ ansible_env['HOME'] }}/anaconda3/include/opencv2"
+  register: opencv_file
+
+- name: install opencv
+  shell: "{{ ansible_env['HOME'] }}/anaconda3/bin/conda install -y -c https://conda.anaconda.org/menpo opencv3"
+  when: not opencv_file.stat.exists
+
+  
+- name: add centos6 repo
+  become: yes
+  become_user: root
+  become_method: sudo
+  copy:
+    src: ./centos6.repo
+    dest: /etc/yum.repos.d/
+
+- name: install opencv dependencies
+  become: yes
+  become_user: root
+  become_method: sudo
+  yum:
+    enablerepo: centos6
+    name:
+      - gtk2
+  # without this we get ImportError: libgtk-x11-2.0.so.0 when doing import cv2
+  
+# - name: let friends in 
+#   authorized_key:
+#     user: ec2-user
+#     key:
+#       - https://github.com/koddo.keys
+#       - https://github.com/maxmmsu.keys
+#       - https://github.com/DwarKapex.keys
+
+- name: add anaconda3/bin to the path env var
+  lineinfile: dest="{{ ansible_env['HOME'] }}/.bashrc" regexp="^PATH\={{ ansible_env['HOME'] }}/anaconda3/bin" line="PATH={{ ansible_env['HOME'] }}/anaconda3/bin:$PATH"
+
+
+
+  
+- name: delete temp files
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /tmp/Anaconda3-4.1.1-Linux-x86_64.sh
+    - /tmp/cudnn-7.5-linux-x64-v5.0-ga.tgz
+
+
+# TODO: install libhdf5-devel and h5py
+
+
+

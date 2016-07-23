@@ -1,0 +1,91 @@
+################################################################
+# just following these instructions
+# assuming we are not upgrading, it's a fresh install
+# skipping deletion of old packages and repositories
+#    https://docs.docker.com/engine/installation/linux/debian/
+#    https://docs.docker.com/compose/install/
+#
+# takes username and public_key_url as variables
+# e.g., koddo and https://github.com/koddo.keys
+################################################################
+
+# - name: remove old docker installation
+#   apt:
+#     state: absent
+#     purge: yes
+#     name:
+#       - lxc-docker*
+#       - docker.io*
+ 
+- name: make sure we have certs and https
+  apt:
+    update_cache: true
+    name:
+      - apt-transport-https
+      - ca-certificates
+
+- name: add key
+  apt_key:
+    keyserver: hkp://p80.pool.sks-keyservers.net:80
+    id: 58118E89F3A912897C070ADBF76221572C52609D
+
+- name: add repo to sources.list
+  apt_repository:
+    repo='deb https://apt.dockerproject.org/repo debian-jessie main'
+    # we would have to delete old repos, but it's a fresh install, so never mind
+
+# verify the apt is pulling from the right repo: $ apt-cache policy docker-engine
+# skipping, because this is quite optional and I'm not sure how to check this here
+
+- name: install docker
+  apt:
+    update_cache: true
+    name:
+      - docker-engine
+
+- name: start docker daemon
+  service:
+    name: docker
+    state: started
+
+- name: add the docker group
+  group: name=docker state=present
+
+- name: add admin to the docker group
+  user:
+    name: admin
+    groups: docker
+    append: yes
+  notify:
+    - restart docker daemon   # don't know why they have this step in docs, should probably work without it
+  
+- name: install docker-compose
+  get_url:
+    url: https://github.com/docker/compose/releases/download/1.7.1/docker-compose-{{ ansible_system }}-{{ ansible_machine }}
+    dest: /usr/local/bin/docker-compose
+    mode: 0755
+    checksum: sha256:3166bb74bc648e68c3154bc704fddf6bccf59f03a0c90fc48aefac034535e4ae
+    backup: yes
+
+- name: make sure docker-compose owner is root:root, 0755
+  file: path=/usr/local/bin/docker-compose owner=root group=root mode=0755
+
+- name: add a user, which can run docker containers
+  user:
+    name: '{{ username }}'
+    groups: docker
+    append: yes
+    shell: /bin/bash
+    
+- name: add key of the user to authorized_keys
+  authorized_key:
+    user: '{{ username }}'
+    key: '{{ public_key_url }}'
+
+  handlers:
+- name: restart docker daemon
+  service:
+    name: docker
+    state: restarted
+
+

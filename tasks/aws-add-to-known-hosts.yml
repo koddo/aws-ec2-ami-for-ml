@@ -1,0 +1,20 @@
+# https://github.com/ansible/ansible-modules-core/issues/575#issuecomment-197165036
+# http://security.stackexchange.com/questions/39990/is-it-safe-to-disable-ssh-host-key-checking-if-key-based-authentication-is-used
+
+- name: get host key from aws cli, this may take some time, amazon doesnt hurry
+  local_action: shell aws ec2 get-console-output --instance-id '{{ item.id }}' --output text | sed -n 's/ecdsa-sha2-nistp256 \([^ ]*\).*/\1/p'
+  register: host_key
+  until: host_key.stdout|length > 0
+  delay: 10
+  retries: 100
+
+- name: add host key
+  local_action: known_hosts key="{{ item.public_dns_name }},{{ item.public_ip }} ecdsa-sha2-nistp256 {{ host_key.stdout }}" name="{{ item.public_dns_name }}" state=present
+
+- debug:
+    msg: "public dns name: {{ item.public_dns_name }}"
+
+
+# - name: rehash known_hosts
+#   local_action: shell ssh-keygen -H
+

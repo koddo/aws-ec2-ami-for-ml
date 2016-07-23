@@ -1,0 +1,8 @@
+{
+    "ImageId": "ami-971a65e0",
+    "Placement": { "AvailabilityZone": "eu-west-1b" },
+    "InstanceType": "t1.micro",
+    "SecurityGroups": ["my-test-security-group--eu-west-1"],
+    "KeyName": "alex@mbp985"
+}
+

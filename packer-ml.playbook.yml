@@ -1,0 +1,20 @@
+---
+- hosts: ec2
+  remote_user: ec2-user
+  
+  tasks:
+    - name: install system updates
+      become: yes
+      become_user: root
+      become_method: sudo
+      yum:
+        name: '*'
+        state: latest
+        update_cache: yes
+
+    - name: install anaconda, theano, keras
+      include: tasks/install-anaconda-theano-keras.yml
+
+    - name: we are going to create ami, so clean up sensitive data
+      include: tasks/clean-up-before-creating-ami.yml
+      

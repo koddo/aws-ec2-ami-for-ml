@@ -1,0 +1,26 @@
+
+# following these guidelines
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/building-shared-amis.html#remove-ssh-host-key-pairs
+
+- name: shred host keys
+  become: yes
+  become_user: root
+  become_method: sudo
+  shell: shred -u /etc/ssh/*_key /etc/ssh/*_key.pub
+      
+- name: shred host keys
+  become: yes
+  become_user: root
+  become_method: sudo
+  shell: find / -name "authorized_keys" -exec shred -u {} \;
+
+- name: shred host keys
+  become: yes
+  become_user: root
+  become_method: sudo
+  shell: find /root/.*history /home/*/.*history -exec shred -u {} \;
+  ignore_errors: true   # there will be file not found errors
+  # TODO: anything better than ignoring all errors?
+
+  
+# TODO: set UseDNS no
