@@ -15,6 +15,9 @@
     - name: install anaconda, theano, keras
       include: tasks/install-anaconda-theano-keras.yml
 
+    # - name: install docker
+    #   include: tasks/install-docker.yml username=koddo public_key_url='https://github.com/koddo.keys'
+
     - name: we are going to create ami, so clean up sensitive data
       include: tasks/clean-up-before-creating-ami.yml
       

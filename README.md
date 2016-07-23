@@ -11,7 +11,7 @@ configure `~/.aws/credentials`
 
 build the ami:
 
-    $ packer build packer-ansible.json
+    $ packer build packer-ml.ami-builder.json
 
 
 # notes to self
