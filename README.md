@@ -14,9 +14,11 @@ build the ami:
     $ packer build packer-ansible.json
 
 
+# notes to self
 
-# some commands
+## some commands
 
+```
 ansible-playbook aws.yml --extra-vars 'spot_price=0.005' 
 while true; do aws ec2 describe-instances --filters Name=instance-state-name,Values=running ; sleep 10 ; done
 while true; do date && aws ec2 describe-instances --filters Name=instance-state-name,Values=running | grep InstanceId ; sleep 10 ; done
@@ -35,26 +37,31 @@ ansible-playbook tasks.yml --step --start-at-task='task name'
 quick check of the installation:
 THEANO_FLAGS='floatX=float32,device=gpu0,lib.cnmem=1' python3 anaconda3/lib/python3.5/site-packages/theano/misc/check_blas.py 
 python -c 'import cv2; print(cv2.__version__)'
+```
 
 
 
+## dinamic inventory
 
-dinamic inventory
-===================
 http://docs.ansible.com/ansible/intro_dynamic_inventory.html#example-aws-ec2-external-inventory-script
 
 at the moment of writing we have to have a copy of this script
 
+```
 $ wget https://raw.githubusercontent.com/ansible/ansible/devel/contrib/inventory/ec2.py \
        https://raw.githubusercontent.com/ansible/ansible/devel/contrib/inventory/ec2.ini && \
     chmod +x ec2.py
+```
 
 then in the ansible config:
-inventory = ./ec2.py
 
-and how we can write hosts=ec2 or hosts=tag_whatever
+    inventory = ./ec2.py
 
-example output to see what it does:
+and how we can write `hosts=ec2` or `hosts=tag_whatever`
+
+example output, to see what it does:
+
+```
 $ ./ec2.py
 {
   "_meta": {
@@ -87,11 +94,11 @@ $ ./ec2.py
   ...
   ...
 }
+```
 
 
 
-create an aws ami with packer.io
-================================
+# create an aws ami with packer.io
 
 this is essentially the same as fire up an instance, run an ansible playbook on it, stop the instance and create a snapshot, then register it as an ami
 
@@ -193,7 +200,7 @@ Build 'amazon-ebs' finished.
 eu-west-1: ami-39ec7a4a
 ```
 
-# quirks
+## quirks
 
 we need this for centos-based source_ami
 
@@ -207,7 +214,7 @@ couldn't run an on-demand instance, had to use spot instance for creating an ami
 
      "Error launching source instance: InstanceLimitExceeded: You have requested more instances (1) than your current instance limit of 0 allows for the specified instance type."
 
-# todos
+## todos
 
 TODO: terminate the instance just before the hour ends just to save some cents --- http://shlomoswidler.com/2011/02/play-chicken-with-spot-instances.html 
 
