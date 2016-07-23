@@ -200,7 +200,7 @@ Build 'amazon-ebs' finished.
 eu-west-1: ami-39ec7a4a
 ```
 
-## quirks
+## packer config quirks
 
 we need this for centos-based source_ami
 
