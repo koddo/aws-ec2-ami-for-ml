@@ -1,15 +1,21 @@
+
+# setup
+
 at the moment of writing ansible runs only on python 2.7 
 
-$ pip install -r requirements.txt
+     $ pip install -r requirements.txt
+     
+install [packer.io](https://www.packer.io/)
 
-TODO: terminate the instance just before the hour ends just to save some cents --- http://shlomoswidler.com/2011/02/play-chicken-with-spot-instances.html 
+configure `~/.aws/credentials`
 
-TODO: try replace_all_instances --- https://t37.net/why-ansible-1-8-is-the-new-immutable-deployment-killer.html
+build the ami:
+
+    $ packer build packer-ansible.json
 
 
 
-some commands
-====================
+# some commands
 
 ansible-playbook aws.yml --extra-vars 'spot_price=0.005' 
 while true; do aws ec2 describe-instances --filters Name=instance-state-name,Values=running ; sleep 10 ; done
@@ -83,17 +89,14 @@ $ ./ec2.py
 }
 
 
-maybe later try this:
-https://pypi.python.org/pypi/ansible-ec2-inventory
-https://github.com/paperhive/ansible-ec2-inventory
-
 
 create an aws ami with packer.io
 ================================
 
 this is essentially the same as fire up an instance, run an ansible playbook on it, stop the instance and create a snapshot, then register it as an ami
 
-$ packer build -var 'aws_access_key=...' -var 'aws_secret_key=...' packer-ansible.json  
+```
+$ packer build packer-ansible.json
 amazon-ebs output will be in this color.
 
 ==> amazon-ebs: Prevalidating AMI Name...
@@ -188,15 +191,29 @@ Build 'amazon-ebs' finished.
 --> amazon-ebs: AMIs were created:
 
 eu-west-1: ami-39ec7a4a
+```
 
+# quirks
 
-quircks
-==========================
 we need this for centos-based source_ami
-"sftp_command": "/usr/libexec/openssh/sftp-server -e"
+
+     "sftp_command": "/usr/libexec/openssh/sftp-server -e"
 
 will try to reach private ip without this
-"associate_public_ip_address": "true"
+
+     "associate_public_ip_address": "true"
 
 couldn't run an on-demand instance, had to use spot instance for creating an ami:
-"Error launching source instance: InstanceLimitExceeded: You have requested more instances (1) than your current instance limit of 0 allows for the specified instance type."
+
+     "Error launching source instance: InstanceLimitExceeded: You have requested more instances (1) than your current instance limit of 0 allows for the specified instance type."
+
+# todos
+
+TODO: terminate the instance just before the hour ends just to save some cents --- http://shlomoswidler.com/2011/02/play-chicken-with-spot-instances.html 
+
+TODO: try replace_all_instances --- https://t37.net/why-ansible-1-8-is-the-new-immutable-deployment-killer.html
+
+maybe later try this:
+https://pypi.python.org/pypi/ansible-ec2-inventory
+https://github.com/paperhive/ansible-ec2-inventory
+
