@@ -89,7 +89,7 @@
   become_user: root
   become_method: sudo
   copy:
-    src: ./centos6.repo
+    src: files/centos6.repo
     dest: /etc/yum.repos.d/
 
 - name: install opencv dependencies
