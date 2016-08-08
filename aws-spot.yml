@@ -5,12 +5,12 @@
   tasks:
     - name: provision a set of instances
       ec2:
-        # instance_type: t1.micro
-        # image: ami-971a65e0
-        # spot_price: 0.005
-        instance_type: g2.2xlarge
-        image: ami-b9bd25ca   # nvidia ami --- https://aws.amazon.com/marketplace/pp/B00FYCDDTE
-        spot_price: 1.0
+        instance_type: t1.micro
+        image: ami-971a65e0
+        spot_price: 0.005
+        # instance_type: g2.2xlarge
+        # image: ami-b9bd25ca   # nvidia ami --- https://aws.amazon.com/marketplace/pp/B00FYCDDTE
+        # spot_price: 1.0
         key_name: alex@mbp985
         groups: my-test-security-group--eu-west-1
         aws_region: eu-west-1
