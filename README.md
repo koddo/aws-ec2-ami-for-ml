@@ -224,3 +224,4 @@ maybe later try this:
 https://pypi.python.org/pypi/ansible-ec2-inventory
 https://github.com/paperhive/ansible-ec2-inventory
 
+TODO: upgrade to latest debian
